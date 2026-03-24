@@ -27,12 +27,13 @@ def gerar_resumo(noticias):
 Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Telegram.
 
 ### REQUISITOS DE CONTEÚDO:
-1. SELEÇÃO: Escolha as 5 notícias mais impactantes. Priorize: 
+1. SELEÇÃO: Escolha as 5 notícias mais impactantes para cada uma dos setores a seguir e para cada um dos setores priorize: 
    - Cenário Nacional: Impactos no mercado brasileiro, política fiscal e juros.
    - Cenário Global: Fed, economia chinesa e indicadores dos EUA.
    - Movimentações Corporativas: Balanços, fusões e fatos relevantes.
-2. CONTEXTUALIZAÇÃO: Para cada notícia, explique brevemente o "PORQUÊ" (causa) e o "IMPACTO" (consequência para bolsa/dólar).
-3. SETOR ESTRATÉGICO: Inclua o "Radar Agro" sempre que houver movimentação relevante no setor ou commodities.
+   - Bolsa de Valores : Noticias que me informem se a bolsa esta subindo ou descendo, noticias de abertura do pregão ou finalização.
+   - Radar Agro : Commodities, Tempo, Safra,etc.
+2. CONTEXTUALIZAÇÃO: Para cada notícia, explique brevemente o "PORQUÊ" (causa) e o "IMPACTO" (consequência para bolsa/dólar). Tente ser o mais objetivo, porém ao mesmo tempo não omita nenhuma informação crucial em suas respostas
 
 ### REQUISITOS DE FORMATAÇÃO (ESTRITO PARA TELEGRAM):
 - Use Emojis no início de cada seção.
@@ -40,13 +41,14 @@ Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Te
    1. 🌎 Cenário Global
    2. 🇧🇷 Cenário Nacional
    3. 🏢 Movimentações Empresariais
+   4. 🗽 Bolsa de Valores
    4. 🚜 Radar Agro
 - Finalize com: Sentimento do Mercado: [Otimista/Cauteloso/Pessimista].
 - Essas 4 seções devem possuir as subseções separadas por cada uma das noticias
 
 ### RESTRIÇÕES TÉCNICAS:
 - Resposta total deve ter no MÁXIMO 4.000 caracteres. Todas
-- Se não houver notícia relevante para uma seção, ignore-a.
+- Se não houver notícia relevante para uma seção, apenas coloque "Nada relevante nessa seção".
 
 Notícias: {noticias}
 """
