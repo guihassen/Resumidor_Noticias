@@ -12,7 +12,10 @@ client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
 def buscar_noticias():
     fontes = [
         "https://www.infomoney.com.br/feed/",
-        "https://www.moneytimes.com.br/feed/"
+        "https://www.moneytimes.com.br/feed/",
+        "https://www.canalrural.com.br/feed/",
+        "https://www.poder360.com.br/economia/feed/",
+        "
     ]
     texto = ""
     for url in fontes:
