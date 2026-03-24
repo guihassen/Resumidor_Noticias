@@ -51,7 +51,7 @@ Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Te
 Notícias: {noticias}
 """
 
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
     return response.text
 
 def enviar_telegram(mensagem):
