@@ -36,8 +36,7 @@ Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Te
    - Movimentações Corporativas: Balanços, fusões e fatos relevantes.
    - Bolsa de Valores : Noticias que me informem se a bolsa esta subindo ou descendo, noticias de abertura do pregão ou finalização.
    - Radar Agro : Commodities, Tempo, Safra,etc.
-2. CONTEXTUALIZAÇÃO: Para cada notícia, explique brevemente o "PORQUÊ" (causa) e o "IMPACTO" (consequência para bolsa/dólar). Tente ser o mais objetivo, porém ao mesmo tempo não omita nenhuma informação crucial em suas respostas
-
+2. CONTEXTUALIZAÇÃO: Para cada notícia, explique brevemente o "PORQUÊ" (causa) e o "IMPACTO" (consequência para bolsa/dólar).
 ### REQUISITOS DE FORMATAÇÃO (ESTRITO PARA TELEGRAM):
 - Use Emojis no início de cada seção.
 - Divida em 4 seções claras: 
@@ -50,7 +49,7 @@ Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Te
 - Essas 4 seções devem possuir as subseções separadas por cada uma das noticias
 
 ### RESTRIÇÕES TÉCNICAS:
-- Resposta total deve ter no MÁXIMO 4.000 caracteres. Todas
+- Resposta total deve ter no MÁXIMO 4.000 caracteres, então não ultrapasse esse limite! Pode deixar ser mais breve em alguns pontos para respeitar esse limite.
 - Se não houver notícia relevante para uma seção, apenas coloque "Nada relevante nessa seção".
 
 Notícias: {noticias}
