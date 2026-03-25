@@ -44,6 +44,7 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 - Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
 - Use apenas as tags HTML <b> e <i>.
 - Nunca use <br> ou <p>.
+- Faça a separação das noticias por tópicos para ficar mais facil de ler, busque facilitar a leitura o máximo e torna-la o mais dinamico possivel
 
 Notícias: {noticias}
 """
