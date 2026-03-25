@@ -15,7 +15,7 @@ def buscar_noticias():
         "https://www.moneytimes.com.br/feed/",
         "https://www.canalrural.com.br/feed/",
         "https://www.poder360.com.br/economia/feed/",
-        "
+        
     ]
     texto = ""
     for url in fontes:
