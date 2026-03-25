@@ -2,6 +2,7 @@ import feedparser
 import requests
 from google import genai
 import os
+import time
 
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -15,83 +16,74 @@ def buscar_noticias():
         "https://www.moneytimes.com.br/feed/",
         "https://www.canalrural.com.br/feed/",
         "https://www.poder360.com.br/economia/feed/",
-        
     ]
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
-        for e in feed.entries[:10]:
+        for e in feed.entries[:8]: # Aumentei para 8 notícias por fonte
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
 def gerar_resumo(noticias):
     prompt = f"""
-    Você é um Analista de Investimentos Sênior e meu Assistente Financeiro Pessoal. 
-Sua missão é processar as notícias abaixo e gerar um "Morning Call" para o Telegram.
+Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo.
+IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
-### REQUISITOS DE CONTEÚDO:
-1. SELEÇÃO: Escolha as 3 notícias mais impactantes para cada uma dos setores a seguir e para cada um dos setores priorize: 
-   - Cenário Nacional: Impactos no mercado brasileiro, política fiscal e juros.
-   - Cenário Global: Fed, economia chinesa e indicadores dos EUA.
-   - Movimentações Corporativas: Balanços, fusões e fatos relevantes.
-   - Bolsa de Valores : Noticias que me informem se a bolsa esta subindo ou descendo, noticias de abertura do pregão ou finalização.
-   - Radar Agro : Commodities, Tempo, Safra,etc.
-   
-2. CONTEXTUALIZAÇÃO: Para cada notícia, explique brevemente o "PORQUÊ" (causa) e o "IMPACTO" (consequência para bolsa/dólar).
-### REQUISITOS DE FORMATAÇÃO (ESTRITO PARA TELEGRAM):
-- Divida em 4 seções claras: 
-   1. 🌎 Cenário Global
-   2. 🇧🇷 Cenário Nacional
-   3. 🏢 Movimentações Empresariais
-   4. 🗽 Bolsa de Valores
-   4. 🚜 Radar Agro
-   
-- Finalize com: Sentimento do Mercado: [Otimista/Cauteloso/Pessimista].
-- Essas 4 seções devem possuir as subseções separadas por cada uma das noticias
+### ESTRUTURA:
+1. 🌎 **Cenário Global**: Foque em Fed, China e indicadores EUA.
+---SECAO---
+2. 🇧🇷 **Cenário Nacional**: Foque em política fiscal, juros e Brasília.
+---SECAO---
+3. 🏢 **Empresas**: Fusões, balanços e fatos relevantes.
+---SECAO---
+4. 🚜 **Radar Agro**: Commodities e clima.
+---SECAO---
+5. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
-### RESTRIÇÕES TÉCNICAS:
-- Resposta total deve ter no MÁXIMO 4.000 caracteres, então não ultrapasse esse limite! 
-- Seja extremamente objetivo na sua resposta, não deixe que o limite de caracteres seja ultrapassado
-- Mantenha sua atenção apenas nas noticias que você julgar importante!
-- Se não houver notícia relevante para uma seção, apenas coloque "Nada relevante nessa seção".
+### REGRAS:
+- Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
+- Use apenas as tags HTML <b> e <i>.
+- Nunca use <br> ou <p>.
 
 Notícias: {noticias}
 """
-
+    # Usando o modelo estável 2.5-flash
     response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
     return response.text
 
 def enviar_telegram(mensagem):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": mensagem,
-        "parse_mode": "HTML" 
-    }
-    response = requests.post(url, json=payload)
-
-    if response.status_code != 200:
-        print(f"\n❌ ERRO NA API DO TELEGRAM:")
-        print(f"Status: {response.status_code}")
-        print(f"Resposta: {response.text}")
+    # Quebra o texto em várias mensagens usando o separador que definimos
+    partes = mensagem.split("---SECAO---")
     
-    return response.status_code
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    
+    for parte in partes:
+        if parte.strip(): # Só envia se não estiver vazio
+            payload = {
+                "chat_id": CHAT_ID,
+                "text": parte.strip(),
+                "parse_mode": "HTML"
+            }
+            response = requests.post(url, json=payload)
+            
+            if response.status_code != 200:
+                print(f"❌ Erro ao enviar parte: {response.text}")
+            
+            # Pequena pausa para o Telegram não bloquear por excesso de velocidade
+            time.sleep(1)
 
 if __name__ == "__main__":
     try:
-        print("Processando notícias...")
+        print("🚀 Iniciando Morning Call...")
         raw_news = buscar_noticias()
         
-        print("Gerando resumo...")
-        resumo = gerar_resumo(raw_news)
+        print("🤖 Inteligência Artificial processando...")
+        resumo_completo = gerar_resumo(raw_news)
         
-        print("Enviando para o Telegram...")
-        status = enviar_telegram(resumo)
+        print("📲 Enviando blocos para o Telegram...")
+        enviar_telegram(resumo_completo)
         
-        if status == 200:
-            print("Concluído com sucesso!")
-        else:
-            print(f"Erro ao enviar para o Telegram. Status: {status}")
+        print("✅ Tudo pronto!")
             
     except Exception as e:
         print(f"\n❌ OCORREU UM ERRO:\n{e}")
