@@ -4,7 +4,7 @@ on:
   schedule:
     # O GitHub usa o padrão POSIX cron (Minuto Hora Dia Mês Dia_da_Semana)
     # 13:00, 17:00 e 21:00 UTC correspondem a 10h, 14h e 18h no Brasil (UTC-3)
-  - cron: '0 13,17,21 * * *'
+  - cron: '15 12,16,20 * * *'
   workflow_dispatch: # Permite que você rode o script manualmente se quiser
 
 jobs:
