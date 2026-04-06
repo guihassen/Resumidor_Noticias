@@ -42,12 +42,12 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 ---SECAO---
 4. 🚜 **Radar Agro**: Commodities e clima.
 ---SECAO---
-5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups.
+5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
 ---SECAO---
 6. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
-- Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado
+- Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado.
 - Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
 - Use apenas as tags HTML <b> e <i>.
 - Nunca use <br> ou <p>.
