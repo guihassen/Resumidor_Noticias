@@ -16,6 +16,10 @@ def buscar_noticias():
         "https://www.moneytimes.com.br/feed/",
         "https://www.canalrural.com.br/feed/",
         "https://www.poder360.com.br/economia/feed/",
+        "https://tecnoblog.net/feed/",
+        "https://canaltech.com.br/rss/",
+        "https://exame.com/tecnologia/feed/",
+        "https://valor.globo.com/rss/tecnologia/"
     ]
     texto = ""
     for url in fontes:
@@ -38,9 +42,12 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 ---SECAO---
 4. 🚜 **Radar Agro**: Commodities e clima.
 ---SECAO---
-5. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
+5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups.
+---SECAO---
+6. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
+- Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado
 - Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
 - Use apenas as tags HTML <b> e <i>.
 - Nunca use <br> ou <p>.
