@@ -47,7 +47,7 @@ Este projeto é um sistema inteligente de curadoria e análise de notícias volt
     TELEGRAM_TOKEN=token_do_seu_bot
     CHAT_ID=seu_id_do_telegram
     ```
-4.  Coloque o seu extrato da XP renomeado para `wallet.pdf` na raiz da pasta.
+4.  Coloque o seu extrato da carteira renomeado para `wallet.pdf` na raiz da pasta.
 
 ## 🤖 Automação (GitHub Actions)
 
