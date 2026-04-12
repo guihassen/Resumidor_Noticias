@@ -1,88 +1,72 @@
-# 📈 Resumidor de Notícias & Morning Call Automático
+# 📈 Resumidor de Noticias & Morning Call Automático
 
-Este projeto é um sistema inteligente de curadoria e análise de notícias voltado para investidores. Ele agrega as principais notícias do dia através de RSS feeds, cruza essas informações com a sua carteira de investimentos pessoal e utiliza a IA **Google Gemini** para gerar um "Morning Call" personalizado, enviado diretamente para o seu Telegram.
+Este projeto é um sistema inteligente de curadoria e análise de notícias voltado para investidores. [cite_start]Ele agrega as principais notícias do dia através de RSS feeds, cruza essas informações com os ativos da sua carteira de investimentos pessoal e utiliza a IA **Google Gemini** para gerar um "Morning Call" personalizado, enviado diretamente para o seu Telegram. [cite: 32, 43, 51]
 
 ## 🚀 Como Funciona?
 
 1.  **Coleta de Dados**: O script busca notícias em tempo real de fontes renomadas (InfoMoney, Money Times, Exame, Canaltech, etc.).
-2.  **Leitura de Carteira**: Ele extrai informações da sua carteira de investimentos a partir de um arquivo `wallet.pdf` (localmente) ou de uma variável de ambiente (em produção).
-3.  **Processamento com IA**: Utiliza modelos avançados do Gemini (2.0/2.5) para analisar o impacto macroeconômico e tecnológico especificamente sobre os ativos que você possui.
+2.  **Leitura de Carteira (Híbrida)**: 
+    * [cite_start]**Localmente**: Extrai informações de ativos, quantidades e preços a partir de um arquivo `wallet.pdf` na raiz do projeto. [cite: 31, 43, 51]
+    * **Em Produção**: Utiliza a variável de ambiente `CARTEIRA` para processar os dados sem necessidade do arquivo físico.
+3.  [cite_start]**Processamento com IA**: Utiliza modelos avançados do Gemini para analisar o impacto macroeconômico especificamente sobre os ativos que você possui, como **ITUB4**, **SLCE3**, **TAEE4** e **HGLG11**. [cite: 43, 51, 170]
 4.  **Entrega**: O resumo é formatado em blocos e enviado via Bot do Telegram, respeitando os limites de caracteres e garantindo uma leitura limpa.
 5.  **Automação**: O projeto está configurado para rodar automaticamente 3 vezes ao dia via GitHub Actions.
 
 ## ✨ Funcionalidades Principais
 
-- **Análise Multi-Setorial**: Cobertura de Cenário Global, Nacional, Empresas, Agro e Tecnologia.
-- **Análise de Carteira**: Insights personalizados sobre como as notícias do dia podem afetar sua posição.
-- **Fallback de Modelos**: Sistema inteligente que tenta usar diferentes versões do Gemini (Pro, Flash, Lite) caso uma falhe.
-- **Formatação HTML**: Mensagens elegantes e organizadas no Telegram.
+* **Análise Multi-Setorial**: Cobertura de Cenário Global, Nacional, Empresas, Agro e Tecnologia.
+* [cite_start]**Análise de Carteira**: Insights personalizados sobre como as notícias do dia podem afetar sua posição e possíveis recomendações. [cite: 43, 51, 172]
+* **Fallback de Modelos**: Sistema inteligente que alterna entre versões do Gemini (Flash, Pro, Lite) caso ocorra erro de cota ou indisponibilidade.
+* **Formatação HTML**: Mensagens organizadas com negrito e itálico para facilitar a leitura no celular.
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Python 3.11+**
-- **Google Gemini API**: Escolha das Melhores Noticias e Linguagem Natural.
-- **Feedparser**: Consumo de RSS Feeds.
-- **PyPDF2**: Extração de dados de PDFs.
-- **Telegram Bot API**: Interface de entrega.
-- **GitHub Actions**: Automação e agendamento (Cron).
+* **Python 3.11+**
+* **Google Gemini API**: Processamento de linguagem natural e análise financeira.
+* **Feedparser**: Consumo de RSS Feeds de notícias.
+* **PyPDF2**: Extração de texto de documentos PDF.
+* **Telegram Bot API**: Entrega de relatórios em tempo real.
+* **GitHub Actions**: Automação de tarefas e agendamento (Cron).
 
 ## ⚙️ Configuração e Instalação
 
-### Pré-requisitos
-
-- Python instalado.
-- Uma API Key do [Google AI Studio](https://aistudio.google.com/).
-- Um Bot no Telegram (criado via @BotFather) e o seu `CHAT_ID`.
-
 ### Instalação Local
 
-1. Clone o repositório:
-
-   ```bash
-   git clone https://github.com/seu-usuario/Resumidor_Noticias.git
-   cd Resumidor_Noticias
-   ```
-
-2. Instale as dependências:
-
-   ```bash
-   pip install google-genai requests feedparser PyPDF2 python-dotenv
-   ```
-
-3. Crie um arquivo `.env` na raiz do projeto:
-
-   ```env
-   GEMINI_KEY=sua_chave_aqui
-   TELEGRAM_TOKEN=token_do_seu_bot
-   CHAT_ID=seu_id_do_telegram
-   ```
-
-4. Coloque o arquivo `wallet.pdf` na raiz para leitura local.
+1.  Clone o repositório:
+    ```bash
+    git clone [https://github.com/seu-usuario/Resumidor_Noticias.git](https://github.com/seu-usuario/Resumidor_Noticias.git)
+    cd Resumidor_Noticias
+    ```
+2.  Instale as dependências:
+    ```bash
+    pip install google-genai requests feedparser PyPDF2 python-dotenv
+    ```
+3.  Crie um arquivo `.env` na raiz do projeto com suas credenciais:
+    ```env
+    GEMINI_KEY=sua_chave_aqui
+    TELEGRAM_TOKEN=token_do_seu_bot
+    CHAT_ID=seu_id_do_telegram
+    ```
+4.  Coloque o seu extrato da XP renomeado para `wallet.pdf` na raiz da pasta.
 
 ## 🤖 Automação (GitHub Actions)
 
-O projeto já conta com um workflow configurado em `.github/workflows/cron.yml`. Para que funcione no GitHub:
+Para que o projeto rode na nuvem de forma segura e agendada:
 
-1.  **Gerar texto da Carteira**: Como o GitHub Actions não terá acesso ao seu PDF físico por segurança, você deve extrair o texto dele localmente:
-    - Coloque seu `wallet.pdf` na raiz do projeto.
-    - Execute: `python leitor_wallet.py`.
-    - Copie todo o texto que aparecer no terminal.
-2.  **Configurar Secrets**: Vá em seu repositório no GitHub em **Settings > Secrets and variables > Actions**.
-3.  Adicione as seguintes _Repository Secrets_:
-    - `GEMINI_KEY`: Sua chave de API do Google.
-    - `TELEGRAM_TOKEN`: Token do seu bot.
-    - `CHAT_ID`: Seu ID de chat.
-    - `CARTEIRA`: Cole aqui o texto que você copiou no passo 1.
+1.  [cite_start]**Extração do Texto**: Rode `python leitor_wallet.py` no seu computador e copie todo o texto extraído da sua carteira que aparecer no terminal. [cite: 43, 51, 170]
+2.  **Configurar Secrets**: No seu repositório GitHub, vá em *Settings > Secrets and variables > Actions* e adicione as chaves:
+    * `GEMINI_KEY`, `TELEGRAM_TOKEN`, `CHAT_ID`.
+    * `CARTEIRA`: Cole aqui o texto que você copiou no passo 1.
+3.  **Ativação Obrigatória**:
+    > ⚠️ **IMPORTANTE**: O GitHub Actions não iniciará o agendamento automático até que você execute o workflow manualmente pela primeira vez.
+    * Vá na aba **Actions** do repositório.
+    * Selecione o workflow **Resumidor Diario de Noticias**.
+    * Clique em **Run workflow**. Isso "acorda" o sistema e valida suas configurações.
 
-O script rodará automaticamente às **10h, 14h e 18h** (horário de Brasília).
+## 🛡️ Segurança
 
-## 📁 Estrutura do Projeto
-
-- `main.py`: Lógica principal, integração com Gemini e Telegram.
-- `leitor_wallet.py`: Módulo especializado em extração de texto de PDFs.
-- `.github/workflows/cron.yml`: Configuração da automação do GitHub.
-- `wallet.pdf`: (Não incluso) Seu arquivo de carteira para testes locais.
+* [cite_start]O arquivo `wallet.pdf` e o `.env` estão no `.gitignore` e nunca serão enviados para o GitHub. [cite: 31, 33]
+* [cite_start]Dados financeiros sensíveis (como o patrimônio de **R$ 7.816,04**) são tratados apenas em memória durante a execução do script. [cite: 128, 170]
 
 ---
-
-_Nota: Este projeto é para fins informativos e de automação de estudos. Decisões de investimento devem ser tomadas com cautela._
+_Este projeto foi desenvolvido para fins acadêmicos e de automação pessoal. Decisões financeiras devem ser tomadas com cautela._
