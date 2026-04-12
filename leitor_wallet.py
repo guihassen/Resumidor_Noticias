@@ -14,3 +14,4 @@ def extrair_carteira(pdf):
 
     return texto_carteira
 
+print(extrair_carteira("wallet.pdf"))
