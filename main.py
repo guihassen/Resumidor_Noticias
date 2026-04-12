@@ -3,7 +3,8 @@ import requests
 from google import genai
 import os
 import time
-from dotenv import load_dotenv  
+from dotenv import load_dotenv 
+from leitor_wallet import extrair_carteira
 
 load_dotenv()
 
@@ -13,6 +14,7 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
 
+texto_carteira = extrair_carteira("wallet.pdf")
 
 def buscar_noticias():
     fontes = [
@@ -32,10 +34,14 @@ def buscar_noticias():
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
-def gerar_resumo(noticias):
+def gerar_resumo(noticias, texto_carteira):
     prompt = f"""
 Eu quero que a primeira mensagem antes de qualquer coisa seja o modelo que você está utilizando!
 Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo.
+
+1. As noticias do momento : {noticias}
+2. Considere minha carteira: {texto_carteira}
+
 IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 ### ESTRUTURA:
@@ -49,6 +55,7 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 ---SECAO---
 5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
 ---SECAO---
+6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações
 6. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
@@ -58,7 +65,7 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 - Nunca use <br> ou <p>.
 - Faça a separação das noticias por tópicos para ficar mais facil de ler, busque facilitar a leitura o máximo e torna-la o mais dinamico possivel
 
-Notícias: {noticias}
+
 """
     models = ["gemini-2.0-flash", "gemini-2.5-pro","gemini-2.0-flash-lite","gemini-2.5.flash-lite"]
 
@@ -109,7 +116,7 @@ if __name__ == "__main__":
         raw_news = buscar_noticias()
         
         print("🤖 Inteligência Artificial processando...")
-        resumo_completo = gerar_resumo(raw_news)
+        resumo_completo = gerar_resumo(raw_news,texto_carteira)
         
         print("📲 Enviando blocos para o Telegram...")
         enviar_telegram(resumo_completo)
