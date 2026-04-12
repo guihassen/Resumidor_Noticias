@@ -67,7 +67,8 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
 ---SECAO---
 6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações
-6. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
+---SECAO---
+7. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
 - Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado.
