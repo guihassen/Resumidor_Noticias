@@ -20,7 +20,7 @@ Este projeto é um sistema inteligente de curadoria e análise de notícias volt
 ## 🛠️ Tecnologias Utilizadas
 
 - **Python 3.11+**
-- **Google Gemini API**: Processamento de Linguagem Natural.
+- **Google Gemini API**: Escolha das Melhores Noticias e Linguagem Natural.
 - **Feedparser**: Consumo de RSS Feeds.
 - **PyPDF2**: Extração de dados de PDFs.
 - **Telegram Bot API**: Interface de entrega.
