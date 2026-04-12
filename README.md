@@ -8,7 +8,7 @@ Este projeto é um sistema inteligente de curadoria e análise de notícias volt
 2.  **Leitura de Carteira (Híbrida)**: 
     * **Localmente**: Extrai informações de ativos, quantidades e preços a partir de um arquivo `wallet.pdf` na raiz do projeto.
     * **Em Produção**: Utiliza a variável de ambiente `CARTEIRA` para processar os dados sem necessidade do arquivo físico no servidor.
-3.  **Processamento com IA**: Utiliza modelos avançados do Gemini para analisar o impacto macroeconômico especificamente sobre os ativos que você possui, como **ITUB4**, **SLCE3**, **TAEE4** e **HGLG11**.
+3.  **Processamento com IA**: Utiliza modelos avançados do Gemini para analisar o impacto macroeconômico especificamente sobre os ativos que você possui
 4.  **Entrega**: O resumo é formatado em blocos e enviado via Bot do Telegram, respeitando os limites de caracteres e garantindo uma leitura limpa.
 5.  **Automação**: O projeto está configurado para rodar automaticamente 3 vezes ao dia via GitHub Actions.
 
