@@ -1,0 +1,7 @@
+# Arquivos de dados sensíveis
+wallet.pdf
+.env
+
+# Pastas de cache do Python
+__pycache__/
+*.pyc

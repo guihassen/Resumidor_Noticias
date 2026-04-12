@@ -3,12 +3,29 @@ import requests
 from google import genai
 import os
 import time
+from dotenv import load_dotenv 
+from leitor_wallet import extrair_carteira
+
+load_dotenv()
 
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
 client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
+
+def ler_carteira():
+    carteira = os.getenv("CARTEIRA")
+
+    if carteira :
+        print("Carteira Lida pelo secrets!")
+        return carteira
+        
+    else :
+        carteira = extrair_carteira("wallet.pdf")
+        print("Carteira Lida Localmente!")
+        return carteira
+      
 
 def buscar_noticias():
     fontes = [
@@ -24,17 +41,22 @@ def buscar_noticias():
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
-        for e in feed.entries[:8]: # Aumentei para 8 notícias por fonte
+        for e in feed.entries[:8]: 
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
-def gerar_resumo(noticias):
+def gerar_resumo(noticias, texto_carteira):
     prompt = f"""
+Eu quero que a primeira mensagem antes de qualquer coisa seja o modelo que você está utilizando!
 Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo.
+
+1. As noticias do momento : {noticias}
+2. Considere minha carteira: {texto_carteira}
+
 IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 ### ESTRUTURA:
-1. 🌎 **Cenário Global**: Foque em Fed, China e indicadores EUA.
+1. 🌎 **Cenário Global**: Foque em Noticias impactantes em escala global, nessa seção quero as noticias geopolíticas e economicas mais importantes do cenario global.
 ---SECAO---
 2. 🇧🇷 **Cenário Nacional**: Foque em política fiscal, juros e Brasília.
 ---SECAO---
@@ -44,7 +66,9 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 ---SECAO---
 5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
 ---SECAO---
-6. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
+6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações
+---SECAO---
+7. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
 - Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado.
@@ -53,10 +77,21 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 - Nunca use <br> ou <p>.
 - Faça a separação das noticias por tópicos para ficar mais facil de ler, busque facilitar a leitura o máximo e torna-la o mais dinamico possivel
 
-Notícias: {noticias}
+
 """
-    # Usando o modelo estável 2.5-flash
-    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+    models = ["gemini-2.0-flash", "gemini-2.5-pro","gemini-2.0-flash-lite","gemini-2.5.flash-lite"]
+
+    for model in models :
+        try :
+            response = client.models.generate_content(model=model, contents=prompt)
+            print("Modelo utilizado :", model)
+            return response.text
+
+        except Exception as e :
+            print(f"Erro {e} no modelo:{model}")
+
+
+
     return response.text
 
 def enviar_telegram(mensagem):
@@ -91,9 +126,10 @@ if __name__ == "__main__":
     try:
         print("🚀 Iniciando Morning Call...")
         raw_news = buscar_noticias()
+        texto_carteira = ler_carteira()
         
         print("🤖 Inteligência Artificial processando...")
-        resumo_completo = gerar_resumo(raw_news)
+        resumo_completo = gerar_resumo(raw_news,texto_carteira)
         
         print("📲 Enviando blocos para o Telegram...")
         enviar_telegram(resumo_completo)

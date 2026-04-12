@@ -4,7 +4,7 @@ on:
   schedule:
     # O GitHub usa o padrão POSIX cron (Minuto Hora Dia Mês Dia_da_Semana)
     # 13:00, 17:00 e 21:00 UTC correspondem a 10h, 14h e 18h no Brasil (UTC-3)
-  - cron: '15 12,16,20 * * *'
+    - cron: "15 12,16,20 * * *"
   workflow_dispatch: # Permite que você rode o script manualmente se quiser
 
 jobs:
@@ -17,16 +17,17 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Instalar dependencias
         run: |
-          pip install google-genai requests feedparser
+          pip install google-genai requests feedparser PyPDF2 python-dotenv
 
       - name: Executar Script
         env:
-          # Estas variáveis devem ser cadastradas nos 'Secrets' do seu repositório
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
+          CARTEIRA: ${{ secrets.CARTEIRA }}
+
         run: python main.py
