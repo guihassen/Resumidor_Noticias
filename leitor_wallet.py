@@ -14,3 +14,7 @@ def extrair_carteira(pdf):
 
     return texto_carteira
 
+
+if __name__ == "__main__":
+ # Isso só vai rodar no seu PC quando você der play NESTE arquivo
+    print(extrair_carteira("wallet.pdf"))
