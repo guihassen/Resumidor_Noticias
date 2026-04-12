@@ -14,7 +14,18 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
 
-texto_carteira = extrair_carteira("wallet.pdf")
+def ler_carteira():
+    carteira = os.getenv("CARTEIRA")
+
+    if carteira :
+        print("Carteira Lida pelo secrets!")
+        return carteira
+        
+    else :
+        carteira = extrair_carteira("wallet.pdf")
+        print("Carteira Lida Localmente!")
+        return carteira
+      
 
 def buscar_noticias():
     fontes = [
@@ -114,6 +125,7 @@ if __name__ == "__main__":
     try:
         print("🚀 Iniciando Morning Call...")
         raw_news = buscar_noticias()
+        texto_carteira = ler_carteira()
         
         print("🤖 Inteligência Artificial processando...")
         resumo_completo = gerar_resumo(raw_news,texto_carteira)
