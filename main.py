@@ -41,7 +41,7 @@ def buscar_noticias():
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
-        for e in feed.entries[:8]: 
+        for e in feed.entries[:5]: 
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
