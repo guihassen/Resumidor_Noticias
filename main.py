@@ -1,18 +1,21 @@
 import feedparser
 import requests
 from google import genai
+from groq import Groq
 import os
 import time
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 from leitor_wallet import extrair_carteira
 
 load_dotenv()
 
 GEMINI_KEY = os.getenv("GEMINI_KEY")
+GROQ_KEY = os.getenv("GROQ_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
+gemini_client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
+groq_client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
 def ler_carteira():
     carteira = os.getenv("CARTEIRA")
@@ -79,20 +82,31 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 
 """
-    models = ["gemini-2.0-flash", "gemini-2.5-pro","gemini-2.0-flash-lite","gemini-2.5.flash-lite"]
+    gemini_models = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite"]
 
-    for model in models :
-        try :
-            response = client.models.generate_content(model=model, contents=prompt)
-            print("Modelo utilizado :", model)
+    for model in gemini_models:
+        try:
+            response = gemini_client.models.generate_content(model=model, contents=prompt)
+            print(f"Modelo utilizado: {model}")
             return response.text
-
-        except Exception as e :
+        except Exception as e:
             print(f"Erro {e} no modelo:{model}")
 
+    if groq_client:
+        groq_models = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.1-8b-instant"]
+        for model in groq_models:
+            try:
+                response = groq_client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=4096
+                )
+                print(f"Modelo Groq utilizado: {model}")
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Erro Groq {e} no modelo:{model}")
 
-
-    return response.text
+    raise RuntimeError("Todos os modelos falharam. Verifique suas cotas e API keys.")
 
 def enviar_telegram(mensagem):
     # 1. LIMPEZA GLOBAL: Remove as tags problemáticas que o Gemini insere (br, p, div)

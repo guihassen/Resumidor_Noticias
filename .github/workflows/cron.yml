@@ -21,11 +21,12 @@ jobs:
 
       - name: Instalar dependencias
         run: |
-          pip install google-genai requests feedparser PyPDF2 python-dotenv
+          pip install google-genai groq requests feedparser PyPDF2 python-dotenv
 
       - name: Executar Script
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          GROQ_KEY: ${{ secrets.GROQ_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
