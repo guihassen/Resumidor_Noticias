@@ -44,7 +44,7 @@ def buscar_noticias():
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
-        for e in feed.entries[:5]: 
+        for e in feed.entries[:8]: 
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
@@ -69,16 +69,17 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 ---SECAO---
 5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
 ---SECAO---
-6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações
+6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações. LIMITE ESTRITO: esta seção deve ter no máximo 4000 caracteres. Seja objetivo e direto.
 ---SECAO---
 7. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
 
 ### REGRAS:
-- Para tecnologia: - Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, noticiais impactantes e tendencias do mercado.
+- CRÍTICO: Cada seção separada por "---SECAO---" deve ter no máximo 4000 caracteres. O Telegram rejeita mensagens maiores. Ajuste o tamanho do texto de cada seção para respeitar esse limite.
+- Para tecnologia: Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, notícias impactantes e tendências do mercado.
 - Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
 - Use apenas as tags HTML <b> e <i>.
 - Nunca use <br> ou <p>.
-- Faça a separação das noticias por tópicos para ficar mais facil de ler, busque facilitar a leitura o máximo e torna-la o mais dinamico possivel
+- Faça a separação das notícias por tópicos para ficar mais fácil de ler, busque facilitar a leitura o máximo e torná-la o mais dinâmica possível.
 
 
 """
