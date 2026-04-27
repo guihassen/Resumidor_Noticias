@@ -109,32 +109,57 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
     raise RuntimeError("Todos os modelos falharam. Verifique suas cotas e API keys.")
 
+def dividir_em_blocos(texto, limite=4096):
+    if len(texto) <= limite:
+        return [texto]
+
+    blocos = []
+    linhas = texto.split("\n")
+    bloco_atual = ""
+
+    for linha in linhas:
+        candidato = bloco_atual + "\n" + linha if bloco_atual else linha
+        if len(candidato) <= limite:
+            bloco_atual = candidato
+        else:
+            if bloco_atual:
+                blocos.append(bloco_atual)
+            # se a linha sozinha for maior que o limite, corta no limite
+            while len(linha) > limite:
+                blocos.append(linha[:limite])
+                linha = linha[limite:]
+            bloco_atual = linha
+
+    if bloco_atual:
+        blocos.append(bloco_atual)
+
+    return blocos
+
 def enviar_telegram(mensagem):
-    # 1. LIMPEZA GLOBAL: Remove as tags problemáticas que o Gemini insere (br, p, div)
-    # Trocamos <br> por quebra de linha real (\n) e removemos o resto
     mensagem_limpa = mensagem.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n")
     mensagem_limpa = mensagem_limpa.replace("<p>", "").replace("</p>", "\n")
-    
-    # 2. Quebra o texto em várias mensagens usando o separador
+
     partes = mensagem_limpa.split("---SECAO---")
-    
+
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    
+
     for parte in partes:
         texto_final = parte.strip()
-        if texto_final: 
+        if not texto_final:
+            continue
+
+        for bloco in dividir_em_blocos(texto_final):
             payload = {
                 "chat_id": CHAT_ID,
-                "text": texto_final,
+                "text": bloco,
                 "parse_mode": "HTML"
             }
             response = requests.post(url, json=payload)
-            
+
             if response.status_code != 200:
                 print(f"❌ Erro ao enviar parte: {response.text}")
-                # Log extra para você ver qual texto causou o erro:
-                print(f"Trecho com erro: {texto_final[:50]}...") 
-            
+                print(f"Trecho com erro: {bloco[:50]}...")
+
             time.sleep(1)
 
 if __name__ == "__main__":
