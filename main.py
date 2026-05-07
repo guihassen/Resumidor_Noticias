@@ -32,21 +32,31 @@ def ler_carteira():
 
 def buscar_noticias(resumo_curto=False):
     fontes = [
+        # Mercados e finanças Brasil
         "https://www.infomoney.com.br/feed/",
         "https://www.moneytimes.com.br/feed/",
-        "https://www.canalrural.com.br/feed/",
+        "https://valor.globo.com/rss/financas/",       # macro BR: câmbio, juros, Selic, Tesouro
         "https://www.poder360.com.br/economia/feed/",
+
+        # Cenário global (gap anterior)
+        "https://valor.globo.com/rss/mundo/",           # mundo: EUA, China, geopolítica
+        "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml",  # governo/política BR
+
+        # Agro (gap anterior — antes só Canal Rural)
+        "https://www.canalrural.com.br/feed/",
+        "https://revistagloborural.globo.com/rss.xml",
+
+        # Tecnologia
         "https://tecnoblog.net/feed/",
         "https://canaltech.com.br/rss/",
         "https://exame.com/tecnologia/feed/",
-        "https://valor.globo.com/rss/tecnologia/"
+        "https://valor.globo.com/rss/tecnologia/",
     ]
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
         for e in feed.entries[:5]:
             if resumo_curto:
-                # Apenas título + primeiros 200 chars do summary para caber no free tier do Groq
                 summary = (e.summary[:200] + "...") if len(e.summary) > 200 else e.summary
             else:
                 summary = e.summary
@@ -55,38 +65,42 @@ def buscar_noticias(resumo_curto=False):
 
 def _build_prompt(noticias, texto_carteira):
     return f"""
-Eu quero que a primeira mensagem antes de qualquer coisa seja o modelo que você está utilizando!
-Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo.
+Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo e detalhado.
 
-1. As noticias do momento : {noticias}
-2. Considere minha carteira: {texto_carteira}
+ANTES DE TUDO: Escreva em uma linha qual modelo de IA você está usando (ex: "Eu estou utilizando um modelo de linguagem avançado treinado pelo Google."). Depois escreva uma introdução de 2-3 frases dando as boas-vindas ao Morning Call do dia, com a data de hoje e panorama geral do cenário.
+
+1. Notícias do momento: {noticias}
+2. Minha carteira: {texto_carteira}
 
 IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 ### ESTRUTURA:
-1. 🌎 **Cenário Global**: Foque em Noticias impactantes em escala global, nessa seção quero as noticias geopolíticas e economicas mais importantes do cenario global.
+1. 🌎 <b>Cenário Global</b>: Notícias geopolíticas e econômicas de maior impacto global.
 ---SECAO---
-2. 🇧🇷 **Cenário Nacional**: Foque em política fiscal, juros e Brasília.
+2. 🇧🇷 <b>Cenário Nacional</b>: Política fiscal, juros, Brasília e economia doméstica.
 ---SECAO---
-3. 🏢 **Empresas**: Fusões, balanços e fatos relevantes.
+3. 🏢 <b>Empresas</b>: Fusões, balanços, fatos relevantes e recomendações de analistas.
 ---SECAO---
-4. 🚜 **Radar Agro**: Commodities e clima.
+4. 🚜 <b>Radar Agro</b>: Commodities agrícolas, preços e clima.
 ---SECAO---
-5. 💻 **Tecnologia e Inovação**: IA, Big Techs, semicondutores e startups. Pegue somente as noticias mais importantes, aquelas com mais impacto. No Máximo 4 para não ultrapassar o limite de 4096 carácteres.
+5. 💻 <b>Tecnologia e Inovação</b>: IA, Big Techs, semicondutores e startups. Máximo 4 itens, os de maior impacto.
 ---SECAO---
-6. 💼 ** Análise de Carteira ** : Análise minha carteira, Me diga como estou posicionado no dia, me diga como as noticias podem afetar minha carteira e possíveis recomendações. LIMITE ESTRITO: esta seção deve ter no máximo 4000 caracteres. Seja objetivo e direto.
+6. 💼 <b>Análise de Carteira</b>: Posicionamento atual, impacto das notícias do dia nos ativos e recomendações práticas. LIMITE ESTRITO: 4000 caracteres.
 ---SECAO---
-7. 📊 **Bolsa e Sentimento**: Fechamento/Abertura e o "clima" do mercado.
+7. 📊 <b>Bolsa e Sentimento</b>: Abertura/fechamento dos índices e "clima" geral do mercado.
+
+### FORMATO DE CADA SEÇÃO:
+Comece com o título da seção em negrito (ex: 🌎 <b>Cenário Global</b>) seguido de uma frase de contexto.
+Para cada notícia/ponto, use exatamente este formato:
+•   <b>Título do Ponto</b>: Descrição detalhada do evento ou dado. <b>Impacto:</b> Análise de como isso afeta o mercado ou os investimentos.
 
 ### REGRAS:
-- CRÍTICO: Cada seção separada por "---SECAO---" deve ter no máximo 4000 caracteres. O Telegram rejeita mensagens maiores. Ajuste o tamanho do texto de cada seção para respeitar esse limite.
-- Para tecnologia: Explique como a tecnologia pode afetar o mercado (ex: "Alta da Nvidia puxa Nasdaq") e também foque em novas tecnologias, notícias impactantes e tendências do mercado.
-- Explique o impacto de cada notícia (ex: "Isso pode pressionar o dólar").
-- Use apenas as tags HTML <b> e <i>.
+- CRÍTICO: Cada seção deve ter no máximo 4000 caracteres.
+- Use tags HTML <b> e <i> para formatação. NUNCA use markdown (**, __, ##, *, -, etc.).
+- Use • (bullet U+2022) para listas, nunca asterisco ou traço como bullet.
 - Nunca use <br> ou <p>.
-- Faça a separação das notícias por tópicos para ficar mais fácil de ler, busque facilitar a leitura o máximo e torná-la o mais dinâmica possível.
-
-
+- NUNCA escreva "Não há notícias relevantes". Se uma área estiver calma, comente brevemente o cenário do dia.
+- Inclua análise de impacto para cada ponto. Seja analítico como um profissional real.
 """
 
 def gerar_resumo(noticias, texto_carteira):
@@ -150,6 +164,9 @@ def dividir_em_blocos(texto, limite=4096):
 
     return blocos
 
+HEADER_TELEGRAM = "<blockquote>Resumidor Guilherme:</blockquote>\n"
+LIMITE_BLOCO = 4096 - len(HEADER_TELEGRAM)
+
 def enviar_telegram(mensagem):
     mensagem_limpa = mensagem.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n")
     mensagem_limpa = mensagem_limpa.replace("<p>", "").replace("</p>", "\n")
@@ -163,10 +180,10 @@ def enviar_telegram(mensagem):
         if not texto_final:
             continue
 
-        for bloco in dividir_em_blocos(texto_final):
+        for bloco in dividir_em_blocos(texto_final, limite=LIMITE_BLOCO):
             payload = {
                 "chat_id": CHAT_ID,
-                "text": bloco,
+                "text": HEADER_TELEGRAM + bloco,
                 "parse_mode": "HTML"
             }
             response = requests.post(url, json=payload)
