@@ -30,7 +30,7 @@ def ler_carteira():
         return carteira
       
 
-def buscar_noticias():
+def buscar_noticias(resumo_curto=False):
     fontes = [
         "https://www.infomoney.com.br/feed/",
         "https://www.moneytimes.com.br/feed/",
@@ -44,8 +44,13 @@ def buscar_noticias():
     texto = ""
     for url in fontes:
         feed = feedparser.parse(url)
-        for e in feed.entries[:5]: 
-            texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
+        for e in feed.entries[:5]:
+            if resumo_curto:
+                # Apenas título + primeiros 200 chars do summary para caber no free tier do Groq
+                summary = (e.summary[:200] + "...") if len(e.summary) > 200 else e.summary
+            else:
+                summary = e.summary
+            texto += f"Título: {e.title}\nResumo: {summary}\n\n"
     return texto
 
 def _build_prompt(noticias, texto_carteira):
@@ -98,9 +103,10 @@ def gerar_resumo(noticias, texto_carteira):
             print(f"Erro {e} no modelo:{model}")
 
     if groq_client:
-        # Groq free tier tem limite de tokens por minuto — trunca o conteúdo para caber
-        noticias_curtas = noticias[:5000]
-        carteira_curta = texto_carteira[:1000]
+        # Groq free tier tem limite de tokens por minuto (~6k TPM)
+        # Busca versão compacta das notícias (summary limitado a 200 chars por artigo)
+        noticias_curtas = buscar_noticias(resumo_curto=True)
+        carteira_curta = texto_carteira[:2000]
         prompt_groq = _build_prompt(noticias_curtas, carteira_curta)
 
         groq_models = ["llama-3.3-70b-versatile", "gemma2-9b-it", "llama-3.1-8b-instant"]
