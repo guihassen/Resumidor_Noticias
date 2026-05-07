@@ -48,8 +48,8 @@ def buscar_noticias():
             texto += f"Título: {e.title}\nResumo: {e.summary}\n\n"
     return texto
 
-def gerar_resumo(noticias, texto_carteira):
-    prompt = f"""
+def _build_prompt(noticias, texto_carteira):
+    return f"""
 Eu quero que a primeira mensagem antes de qualquer coisa seja o modelo que você está utilizando!
 Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo.
 
@@ -83,6 +83,10 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 
 """
+
+def gerar_resumo(noticias, texto_carteira):
+    prompt = _build_prompt(noticias, texto_carteira)
+
     gemini_models = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite"]
 
     for model in gemini_models:
@@ -94,12 +98,17 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
             print(f"Erro {e} no modelo:{model}")
 
     if groq_client:
-        groq_models = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.1-8b-instant"]
+        # Groq free tier tem limite de tokens por minuto — trunca o conteúdo para caber
+        noticias_curtas = noticias[:5000]
+        carteira_curta = texto_carteira[:1000]
+        prompt_groq = _build_prompt(noticias_curtas, carteira_curta)
+
+        groq_models = ["llama-3.3-70b-versatile", "gemma2-9b-it", "llama-3.1-8b-instant"]
         for model in groq_models:
             try:
                 response = groq_client.chat.completions.create(
                     model=model,
-                    messages=[{"role": "user", "content": prompt}],
+                    messages=[{"role": "user", "content": prompt_groq}],
                     max_tokens=4096
                 )
                 print(f"Modelo Groq utilizado: {model}")
