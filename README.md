@@ -1,32 +1,41 @@
 # 📈 Resumidor de Noticias & Morning Call Automático
 
-Este projeto é um sistema inteligente de curadoria e análise de notícias voltado para investidores. Ele agrega as principais notícias do dia através de RSS feeds, cruza essas informações com os ativos da sua carteira de investimentos pessoal e utiliza a IA **Google Gemini** para gerar um "Morning Call" personalizado, enviado diretamente para o seu Telegram.
+Este projeto é um sistema inteligente de curadoria e análise voltado para investidores. Ele agrega as principais notícias do dia, **cruza com dados reais de mercado dos ativos da sua carteira** (cotações, valuation, dividend yield), incorpora **projeções econômicas do Boletim Focus/Bacen** e usa a IA **Google Gemini** para gerar um "Morning Call" personalizado — com texto e **gráficos** — enviado diretamente para o seu Telegram.
 
 ## 🚀 Como Funciona?
 
-1.  **Coleta de Dados**: O script busca notícias em tempo real de fontes renomadas (InfoMoney, Money Times, Exame, Canaltech, etc.).
-2.  **Leitura de Carteira (Híbrida)**: 
-    * **Localmente**: Extrai informações de ativos, quantidades e preços a partir de um arquivo `wallet.pdf` na raiz do projeto.
-    * **Em Produção**: Utiliza a variável de ambiente `CARTEIRA` para processar os dados sem necessidade do arquivo físico no servidor.
-3.  **Processamento com IA**: Utiliza modelos avançados do Gemini para analisar o impacto macroeconômico especificamente sobre os ativos que você possui
-4.  **Entrega**: O resumo é formatado em blocos e enviado via Bot do Telegram, respeitando os limites de caracteres e garantindo uma leitura limpa.
-5.  **Automação**: O projeto está configurado para rodar automaticamente 3 vezes ao dia via GitHub Actions.
+1.  **Coleta de Notícias**: Busca notícias em tempo real via RSS (InfoMoney, Money Times, Valor, Exame, etc.).
+2.  **Leitura e Estruturação da Carteira**: Extrai o texto do extrato (`wallet.pdf` local ou variável `CARTEIRA` em produção) e usa o Gemini para convertê-lo em **ativos estruturados** (ticker, tipo, quantidade).
+3.  **Dados de Mercado**: Busca cotações, P/L, P/VP, dividend yield, setor e visão de analistas (via `yfinance`, opcionalmente `brapi.dev`) e calcula métricas reais da carteira (alocação, exposição setorial, momentum).
+4.  **Projeções Macro**: Consulta a API gratuita do Banco Central (Focus) para Selic, IPCA, Câmbio e PIB.
+5.  **Notícias Conectadas**: Filtra as notícias que citam seus ativos e extrai o **texto completo** das matérias (scraping com `trafilatura`) para análises mais profundas.
+6.  **Processamento com IA**: O Gemini gera o Morning Call usando todos esses dados reais — incluindo diagnóstico da carteira, pontos de melhoria e decisões.
+7.  **Entrega**: Texto formatado em blocos + **gráficos** (alocação, rentabilidade por ativo, evolução do patrimônio) enviados via Bot do Telegram.
+8.  **Persistência**: Snapshots diários da carteira vão para um **Postgres privado** (fora do repositório) para alimentar o histórico e o gráfico de evolução.
+9.  **Automação**: Roda automaticamente 3 vezes ao dia via GitHub Actions.
 
 ## ✨ Funcionalidades Principais
 
-* **Análise Multi-Setorial**: Cobertura de Cenário Global, Nacional, Empresas, Agro e Tecnologia.
-* **Análise de Carteira**: Insights personalizados sobre como as notícias do dia podem afetar sua posição e possíveis recomendações.
-* **Fallback de Modelos**: Sistema inteligente que alterna entre versões do Gemini (Flash, Pro, Lite) caso ocorra erro de cota ou indisponibilidade de um modelo específico.
-* **Formatação HTML**: Mensagens organizadas com tags permitidas pelo Telegram para facilitar a leitura no celular.
+* **Análise Multi-Setorial**: Cenário Global, Nacional, Projeções (Focus), Empresas, Agro e Tecnologia.
+* **Métricas Reais da Carteira**: Valor total, alocação por classe, exposição setorial, dividend yield, valuation e momentum — com base em dados de mercado do dia.
+* **Notícias Conectadas à Carteira**: Seção dedicada que cruza notícias (com texto completo) aos seus ativos.
+* **Projeções Econômicas**: Selic, IPCA, Câmbio e PIB do Boletim Focus/Bacen.
+* **Gráficos**: Alocação (pizza), rentabilidade por ativo (barras) e evolução do patrimônio (linha).
+* **Fallback de Modelos**: Alterna entre versões do Gemini (e Groq) caso ocorra erro de cota.
+* **Arquitetura Modular**: Código organizado em `src/` (wallet, market, news, analysis, charts, db, delivery).
 
 ## 🛠️ Tecnologias Utilizadas
 
 * **Python 3.11+**
-* **Google Gemini API**: Processamento de linguagem natural e análise financeira.
-* **Feedparser**: Consumo de RSS Feeds de notícias.
-* **PyPDF2**: Extração de texto de documentos PDF.
-* **Telegram Bot API**: Entrega de relatórios via chat.
-* **GitHub Actions**: Automação de tarefas e agendamento via Cron.
+* **Google Gemini API**: Estruturação da carteira e geração da análise.
+* **yfinance / brapi.dev**: Cotações, fundamentos e visão de analistas.
+* **API Olinda/BCB (Focus)**: Projeções macroeconômicas (gratuita).
+* **Feedparser + Trafilatura**: RSS e extração do texto completo das matérias.
+* **Matplotlib**: Geração dos gráficos.
+* **SQLAlchemy + PostgreSQL**: Persistência privada do histórico da carteira.
+* **PyPDF2**: Extração de texto do extrato em PDF.
+* **Telegram Bot API**: Entrega de texto e imagens via chat.
+* **GitHub Actions**: Automação e agendamento via Cron.
 
 ## ⚙️ Configuração e Instalação
 
@@ -39,15 +48,21 @@ Este projeto é um sistema inteligente de curadoria e análise de notícias volt
     ```
 2.  Instale as dependências:
     ```bash
-    pip install google-genai requests feedparser PyPDF2 python-dotenv
+    pip install -r requirements.txt
     ```
 3.  Crie um arquivo `.env` na raiz do projeto com suas credenciais:
     ```env
     GEMINI_KEY=sua_chave_aqui
     TELEGRAM_TOKEN=token_do_seu_bot
     CHAT_ID=seu_id_do_telegram
+    # Opcionais:
+    GROQ_KEY=chave_groq_para_fallback
+    DATABASE_URL=postgresql://usuario:senha@host:5432/banco   # Postgres privado (histórico)
+    BRAPI_TOKEN=token_brapi                                    # cotações via brapi.dev
     ```
 4.  Coloque o seu extrato da carteira renomeado para `wallet.pdf` na raiz da pasta.
+
+> **Sobre o `DATABASE_URL`**: é **opcional**. Sem ele, o pipeline roda normalmente, apenas sem o histórico e o gráfico de evolução do patrimônio. Use uma base **privada** (ex.: [Supabase](https://supabase.com) ou [Neon](https://neon.tech), free tier) — assim seus dados financeiros **nunca** ficam no repositório.
 
 ## 🤖 Automação (GitHub Actions)
 
@@ -57,6 +72,7 @@ Para que o projeto rode na nuvem de forma segura e agendada:
 2.  **Configurar Secrets**: No seu repositório GitHub, vá em *Settings > Secrets and variables > Actions* e adicione as chaves:
     * `GEMINI_KEY`, `TELEGRAM_TOKEN`, `CHAT_ID`.
     * `CARTEIRA`: Cole aqui o texto que você copiou no passo 1.
+    * *(Opcionais)* `GROQ_KEY`, `DATABASE_URL` (Postgres privado para histórico/gráfico de evolução), `BRAPI_TOKEN`.
 3.  **Ativação Obrigatória**:
     > ⚠️ **IMPORTANTE**: O agendamento automático do GitHub Actions (Cron) só entrará em vigor após você executar o workflow manualmente pela primeira vez.
     * Vá na aba **Actions** do repositório.
@@ -65,8 +81,9 @@ Para que o projeto rode na nuvem de forma segura e agendada:
 
 ## 🛡️ Segurança
 
-* O arquivo `wallet.pdf` e o arquivo `.env` estão listados no `.gitignore` e **nunca** serão enviados para o repositório público.
+* Os arquivos `wallet.pdf`, `.env` e a pasta `.venv/` estão no `.gitignore` e **nunca** vão para o repositório.
 * O acesso aos dados financeiros no GitHub Actions é feito exclusivamente via *Secrets* criptografados.
+* O histórico da carteira é gravado em um **Postgres privado** (fora do repositório), nunca em arquivo versionado — por isso seu patrimônio e posições não ficam expostos.
 
 ---
 _Este projeto foi desenvolvido para fins acadêmicos e de automação pessoal. Decisões financeiras devem ser tomadas com cautela._

@@ -17,7 +17,7 @@ jobs:
           python-version: "3.11"
       - name: Instalar dependencias
         run: |
-          pip install google-genai groq requests feedparser PyPDF2 python-dotenv
+          pip install -r requirements.txt
       - name: Executar Script
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
@@ -25,4 +25,6 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}   # Postgres privado (histórico/gráfico de evolução)
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}     # opcional: cotações via brapi.dev
         run: python main.py

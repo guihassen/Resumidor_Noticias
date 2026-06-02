@@ -1,20 +1,9 @@
-import PyPDF2 
+"""Compatibilidade: a extração de PDF agora vive em src/wallet/parser.py.
 
-
-def extrair_carteira(pdf):
-
-    texto_carteira = ""
-
-    with open(pdf,"rb") as wallet :
-        leitor = PyPDF2.PdfReader(wallet)
-
-        for i in range(len(leitor.pages)) :
-            pagina = leitor.pages[i]
-            texto_carteira += f"--- PÁGINA {i+1} ---\n{pagina.extract_text()}\n"
-
-    return texto_carteira
-
+Mantido para o passo do README ("rode python leitor_wallet.py e copie o texto").
+"""
+from src.wallet.parser import extrair_texto_pdf as extrair_carteira
 
 if __name__ == "__main__":
- # Isso só vai rodar no seu PC quando você der play NESTE arquivo
+    # Roda no seu PC para copiar o texto da carteira para o secret CARTEIRA.
     print(extrair_carteira("wallet.pdf"))

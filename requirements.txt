@@ -1,0 +1,11 @@
+google-genai
+groq
+requests
+feedparser
+PyPDF2
+python-dotenv
+yfinance
+trafilatura
+matplotlib
+SQLAlchemy
+psycopg2-binary

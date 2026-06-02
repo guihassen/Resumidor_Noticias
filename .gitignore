@@ -5,3 +5,7 @@ wallet.pdf
 # Pastas de cache do Python
 __pycache__/
 *.pyc
+
+# Ambiente virtual
+.venv/
+venv/
