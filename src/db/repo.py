@@ -37,6 +37,14 @@ asset_snapshots = Table(
     Column("peso_pct", Float),
 )
 
+news_seen = Table(
+    "news_seen", _meta,
+    Column("id", Integer, primary_key=True),
+    Column("link", String(500), index=True),
+    Column("titulo", String(500)),
+    Column("visto_em", DateTime, default=datetime.utcnow, index=True),
+)
+
 
 def _normalizar_url(url: str) -> str:
     # Heroku/Supabase às vezes entregam "postgres://"; SQLAlchemy quer "postgresql://".
@@ -91,6 +99,43 @@ def salvar_snapshot(m: dict) -> bool:
     except Exception as e:
         print(f"Falha ao salvar snapshot: {e}")
         return False
+
+
+def filtrar_noticias_novas(entradas, horas: int = 20):
+    """Remove notícias já vistas em runs recentes (janela `horas`) e registra as novas.
+
+    Sem DATABASE_URL, retorna as entradas inalteradas (dedupe desativado).
+    """
+    eng = get_engine()
+    if not eng or not entradas:
+        return entradas
+    from datetime import timedelta
+
+    corte = datetime.utcnow() - timedelta(hours=horas)
+    try:
+        with eng.connect() as conn:
+            vistos = {
+                r[0]
+                for r in conn.execute(
+                    select(news_seen.c.link).where(news_seen.c.visto_em >= corte)
+                ).all()
+            }
+        # Mantém quem não tem link (não dá pra deduplicar) ou cujo link é inédito.
+        novas = [e for e in entradas if not e.get("link") or e["link"] not in vistos]
+        with eng.begin() as conn:
+            for e in novas:
+                link = e.get("link")
+                if link:
+                    conn.execute(insert(news_seen).values(
+                        link=link[:500], titulo=(e.get("titulo") or "")[:500]
+                    ))
+        removidas = len(entradas) - len(novas)
+        if removidas:
+            print(f"Dedupe: {removidas} notícias já vistas removidas; {len(novas)} novas.")
+        return novas
+    except Exception as e:
+        print(f"Falha no dedupe de notícias: {e}")
+        return entradas
 
 
 def _mes_para_data(mes_str: str):

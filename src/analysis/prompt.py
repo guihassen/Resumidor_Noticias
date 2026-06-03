@@ -6,6 +6,7 @@ def build_prompt(
     metricas_carteira: str,
     noticias_relevantes: str = "",
     projecoes: str = "",
+    expectativa_dia: str = "",
 ) -> str:
     bloco_relevantes = ""
     if noticias_relevantes:
@@ -21,6 +22,13 @@ def build_prompt(
 {projecoes}
 """
 
+    bloco_expectativa = ""
+    if expectativa_dia:
+        bloco_expectativa = f"""
+5. SINAIS TÉCNICOS E EVENTOS POR ATIVO (base para a seção "Expectativa do dia"):
+{expectativa_dia}
+"""
+
     return f"""
 Você é um Analista de Investimentos Sênior. Gere um "Morning Call" completo e detalhado.
 
@@ -30,7 +38,7 @@ ANTES DE TUDO: Escreva em uma linha qual modelo de IA você está usando (ex: "E
 
 2. MÉTRICAS REAIS DA MINHA CARTEIRA (dados de mercado de hoje — use os números, não invente):
 {metricas_carteira}
-{bloco_relevantes}{bloco_projecoes}
+{bloco_relevantes}{bloco_projecoes}{bloco_expectativa}
 IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
 
 ### ESTRUTURA:
@@ -54,7 +62,9 @@ IMPORTANTE: Use o separador "---SECAO---" entre cada tópico.
    - <b>Pontos de melhoria e decisões</b>: 2-4 ações práticas e priorizadas (ex: reduzir concentração, reforçar classe X, observar gatilho Y), cada uma justificada pelos dados.
    Seja específico e acionável; nada de conselhos genéricos. LIMITE ESTRITO: 4000 caracteres.
 ---SECAO---
-9. 📊 <b>Bolsa e Sentimento</b>: Abertura/fechamento dos índices e "clima" geral do mercado.
+9. 🎯 <b>Expectativa do dia</b>: Use os sinais técnicos e eventos do item 5 + o sentimento das notícias do dia. Comece com a <b>expectativa para a CARTEIRA hoje</b> (viés positivo/neutro/negativo e por quê). Depois, por ativo de renda variável: una tendência (médias móveis), RSI (sobrecomprado/sobrevendido), posição no range de 52s, upside vs. preço-alvo, eventos próximos (resultado/dividendo) e o tom das notícias, fechando com a expectativa do dia. Deixe claro que é leitura técnica/probabilística, não garantia.
+---SECAO---
+10. 📊 <b>Bolsa e Sentimento</b>: Abertura/fechamento dos índices e "clima" geral do mercado.
 
 ### FORMATO DE CADA SEÇÃO:
 Comece com o título da seção em negrito (ex: 🌎 <b>Cenário Global</b>) seguido de uma frase de contexto.

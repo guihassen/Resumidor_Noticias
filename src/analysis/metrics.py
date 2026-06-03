@@ -40,6 +40,8 @@ def construir(holdings, dados_mercado: dict, dados_carteira: dict = None) -> dic
         rent_mes = _num(h.get("rent_mes_pct"))
         rent_ano = _num(h.get("rent_ano_pct"))
         var_mes_mercado = _num(dm.get("var_mes_pct"))
+        preco_alvo = _num(dm.get("preco_alvo"))
+        upside = round((preco_alvo / preco - 1) * 100, 1) if (preco and preco_alvo) else None
 
         itens.append({
             "ticker": ticker,
@@ -51,14 +53,23 @@ def construir(holdings, dados_mercado: dict, dados_carteira: dict = None) -> dic
             "rent_mes_pct": rent_mes,
             "rent_ano_pct": rent_ano,
             "var_mes_mercado_pct": var_mes_mercado,
+            "var_dia_pct": _num(dm.get("var_dia_pct")),
             # rentabilidade a exibir/plotar: prioriza o ano do XP, senão o mês do XP, senão mercado
             "rentab_pct": rent_ano if rent_ano is not None else (rent_mes if rent_mes is not None else var_mes_mercado),
             "pl": _num(dm.get("pl")),
             "pvp": _num(dm.get("pvp")),
             "dy_pct": _num(dm.get("dy_pct")),
             "setor": dm.get("setor"),
-            "preco_alvo": _num(dm.get("preco_alvo")),
+            "preco_alvo": preco_alvo,
+            "upside_pct": upside,
             "recomendacao": dm.get("recomendacao"),
+            "tendencia": dm.get("tendencia"),
+            "sma9": _num(dm.get("sma9")),
+            "sma21": _num(dm.get("sma21")),
+            "rsi": _num(dm.get("rsi")),
+            "pos_52s_pct": _num(dm.get("pos_52s_pct")),
+            "volatilidade_pct": _num(dm.get("volatilidade_pct")),
+            "eventos": dm.get("eventos") or {},
         })
 
     # Patrimônio oficial do XP é a fonte de verdade; senão soma das posições.
@@ -95,6 +106,11 @@ def construir(holdings, dados_mercado: dict, dados_carteira: dict = None) -> dic
     maiores_altas = sorted(com_rentab, key=lambda i: -i["rentab_pct"])[:3]
     maiores_baixas = sorted(com_rentab, key=lambda i: i["rentab_pct"])[:3]
 
+    # Variação do dia da carteira (ponderada pelo valor das posições).
+    vd_num = sum(i["var_dia_pct"] * i["valor"] for i in itens if i["valor"] and i["var_dia_pct"] is not None)
+    vd_den = sum(i["valor"] for i in itens if i["valor"] and i["var_dia_pct"] is not None)
+    var_dia_carteira = round(vd_num / vd_den, 2) if vd_den else None
+
     observacoes = _observacoes(itens, pct(por_classe), pct(por_setor))
 
     return {
@@ -109,6 +125,7 @@ def construir(holdings, dados_mercado: dict, dados_carteira: dict = None) -> dic
         "maiores_baixas": [(i["ticker"], i["rentab_pct"]) for i in maiores_baixas],
         "rent_carteira": dados_carteira.get("rent_carteira") or {},
         "benchmarks": dados_carteira.get("benchmarks") or {},
+        "var_dia_carteira_pct": var_dia_carteira,
         "observacoes": observacoes,
     }
 
@@ -159,6 +176,48 @@ def _bloco_resultado(m: dict):
         )
         linhas.append(f"  • Benchmarks: {comp}")
     return linhas
+
+
+def _rsi_label(rsi):
+    if rsi is None:
+        return ""
+    if rsi >= 70:
+        return " (sobrecomprado)"
+    if rsi <= 30:
+        return " (sobrevendido)"
+    return ""
+
+
+def formatar_expectativa_dia(m: dict) -> str:
+    """Bloco de sinais por ativo para a IA montar a 'expectativa do dia'."""
+    rv = [it for it in m["itens"] if it.get("tendencia") or it.get("rsi") is not None or it.get("upside_pct") is not None]
+    if not rv:
+        return ""
+    linhas = []
+    vd = m.get("var_dia_carteira_pct")
+    if vd is not None:
+        linhas.append(f"Variação da carteira hoje (parcial, ponderada): {vd}%")
+    for it in rv:
+        partes = [f"preço {_fmt(it['preco'])}", f"dia {_fmt(it['var_dia_pct'], '%')}"]
+        if it.get("tendencia"):
+            partes.append(f"tendência {it['tendencia']} (SMA9 {_fmt(it['sma9'])}/SMA21 {_fmt(it['sma21'])})")
+        if it.get("rsi") is not None:
+            partes.append(f"RSI {it['rsi']}{_rsi_label(it['rsi'])}")
+        if it.get("pos_52s_pct") is not None:
+            partes.append(f"{it['pos_52s_pct']}% do range 52s")
+        if it.get("volatilidade_pct") is not None:
+            partes.append(f"vol {it['volatilidade_pct']}%")
+        if it.get("upside_pct") is not None:
+            partes.append(f"upside vs alvo {it['upside_pct']}%")
+        if it.get("recomendacao") and it["recomendacao"] != "none":
+            partes.append(f"rec {it['recomendacao']}")
+        ev = it.get("eventos") or {}
+        if ev.get("prox_resultado"):
+            partes.append(f"resultado em {ev['prox_resultado']}")
+        if ev.get("prox_dividendo"):
+            partes.append(f"dividendo (ex) em {ev['prox_dividendo']}")
+        linhas.append(f"  • {it['ticker']}: " + " | ".join(partes))
+    return "\n".join(linhas)
 
 
 def formatar_para_prompt(m: dict) -> str:

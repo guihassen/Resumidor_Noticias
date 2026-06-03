@@ -22,10 +22,14 @@ def run():
     print("🚀 Iniciando Morning Call...")
 
     entradas = feeds.coletar_entradas()
+    entradas = repo.filtrar_noticias_novas(entradas)  # dedupe (no-op sem DATABASE_URL)
     raw_news = feeds.formatar_entradas(entradas)
 
     print("🔮 Buscando projeções do Focus/Bacen...")
     projecoes = bcb.formatar_para_prompt(bcb.obter_projecoes())
+    dolar = quotes.cambio_atual()
+    if dolar:
+        projecoes += f"\nCÂMBIO ATUAL (USD/BRL): R$ {dolar}"
 
     texto_carteira = parser.ler_carteira_texto()
     carteira = parser.estruturar_carteira(texto_carteira)
@@ -34,11 +38,13 @@ def run():
     m = None
     historico_mensal = carteira.get("historico_mensal") or []
     noticias_relevantes = ""
+    expectativa_dia = ""
     if holdings:
         print("📊 Buscando dados de mercado e calculando métricas...")
         dados_mercado = quotes.obter_dados_carteira(holdings)
         m = metrics.construir(holdings, dados_mercado, carteira)
         carteira_para_prompt = metrics.formatar_para_prompt(m)
+        expectativa_dia = metrics.formatar_expectativa_dia(m)
 
         print("📰 Filtrando notícias ligadas à carteira e extraindo texto completo...")
         nomes = {tk: dm.get("nome") for tk, dm in dados_mercado.items()}
@@ -51,7 +57,7 @@ def run():
 
     print("🤖 Inteligência Artificial processando...")
     resumo_completo = llm.gerar_resumo(
-        raw_news, carteira_para_prompt, noticias_relevantes, projecoes
+        raw_news, carteira_para_prompt, noticias_relevantes, projecoes, expectativa_dia
     )
 
     print("📲 Enviando blocos para o Telegram...")
@@ -78,8 +84,9 @@ def _enviar_graficos(m: dict, historico_mensal):
         serie = repo.mensal_para_serie(historico_mensal)
 
     graficos = [
-        ("📊 Alocação por classe de ativo", render.alocacao_por_classe(m)),
-        (f"📈 Rentabilidade {m.get('rentab_label', '')} por ativo".strip(), render.momentum_por_ativo(m)),
+        ("🗺️ Mapa da carteira (peso × variação de hoje)", render.heatmap_posicoes(m)),
+        ("📊 Variação de hoje por ativo", render.variacao_do_dia(m)),
+        ("⚖️ Carteira vs. CDI e Ibovespa", render.carteira_vs_benchmarks(m)),
         ("💹 Evolução do patrimônio", render.evolucao_patrimonio(serie)),
     ]
     for legenda, imagem in graficos:

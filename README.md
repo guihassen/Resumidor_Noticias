@@ -17,10 +17,11 @@ Este projeto é um sistema inteligente de curadoria e análise voltado para inve
 ## ✨ Funcionalidades Principais
 
 * **Análise Multi-Setorial**: Cenário Global, Nacional, Projeções (Focus), Empresas, Agro e Tecnologia.
-* **Métricas Reais da Carteira**: Valor total, alocação por classe, exposição setorial, dividend yield, valuation e momentum — com base em dados de mercado do dia.
-* **Notícias Conectadas à Carteira**: Seção dedicada que cruza notícias (com texto completo) aos seus ativos.
-* **Projeções Econômicas**: Selic, IPCA, Câmbio e PIB do Boletim Focus/Bacen.
-* **Gráficos**: Alocação (pizza), rentabilidade por ativo (barras) e evolução do patrimônio (linha).
+* **Métricas Reais da Carteira**: Valor total, alocação por classe, exposição setorial, dividend yield, valuation, rentabilidade por ativo e patrimônio oficial (relatório XP).
+* **Notícias Conectadas à Carteira**: Seção dedicada que cruza notícias (com texto completo) aos seus ativos, sem repetir entre execuções (dedupe via banco).
+* **Projeções Econômicas**: Selic, IPCA, Câmbio e PIB do Boletim Focus/Bacen + câmbio atual.
+* **Expectativa do Dia**: Por ativo — tendência (médias móveis), RSI, posição no range de 52 semanas, eventos (resultados/dividendos), upside vs. preço-alvo e sentimento das notícias.
+* **Gráficos dinâmicos**: Mapa da carteira (heatmap peso × variação de hoje), variação do dia por ativo, carteira vs. CDI/Ibovespa e evolução do patrimônio.
 * **Fallback de Modelos**: Alterna entre versões do Gemini (e Groq) caso ocorra erro de cota.
 * **Arquitetura Modular**: Código organizado em `src/` (wallet, market, news, analysis, charts, db, delivery).
 

@@ -13,8 +13,9 @@ def gerar_resumo(
     texto_carteira: str,
     noticias_relevantes: str = "",
     projecoes: str = "",
+    expectativa_dia: str = "",
 ) -> str:
-    prompt = build_prompt(noticias, texto_carteira, noticias_relevantes, projecoes)
+    prompt = build_prompt(noticias, texto_carteira, noticias_relevantes, projecoes, expectativa_dia)
     client = get_gemini()
 
     for model in GEMINI_MODELS:
