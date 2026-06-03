@@ -2,9 +2,9 @@ name: Resumidor Diario de Noticias
 on:
   schedule:
     # Horários em UTC. Brasília = UTC-3 → somar 3h ao horário local desejado.
-    - cron: "0 13 * * *"   # 10:00 BRT
-    - cron: "0 19 * * *"   # 16:00 BRT
-    - cron: "0 23 * * *"   # 20:00 BRT
+    - cron: "0 13 * * *" # 10:00 BRT
+    - cron: "0 16 * * *" # 16:00 BRT
+    - cron: "0 21 * * *" # 20:00 BRT
   workflow_dispatch:
 jobs:
   build:
@@ -26,6 +26,6 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}   # Postgres privado (histórico/gráfico de evolução)
-          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}     # opcional: cotações via brapi.dev
+          DATABASE_URL: ${{ secrets.DATABASE_URL }} # Postgres privado (histórico/gráfico de evolução)
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }} # opcional: cotações via brapi.dev
         run: python main.py
