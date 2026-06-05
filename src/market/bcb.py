@@ -31,6 +31,28 @@ def _focus(indicador: str, ano: int):
     valores = r.json().get("value", [])
     return valores[0] if valores else None
 
+_SGS = {"Selic": 432, "IPCA (12m)": 13522, "Câmbio (R$/US$)": 1}
+
+
+def obter_valores_atuais() -> dict :
+    "Valores Recentes de cada Indicador via API SGS do BCB"
+    atuais = {}
+    for rotulo, codigo in _SGS.items():
+
+        try :
+            url = f"https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo}/dados/ultimos/1?formato=json"
+            r = requests.get(url, timeout=25)
+            r.raise_for_status()
+            dados = r.json()
+
+            if dados :
+                atuais[rotulo] = dados[-1]["valor"]
+        
+        except Exception as e :
+            print(f"SGS falhou ({rotulo}): {e}")
+
+    return atuais 
+
 
 def obter_projecoes() -> dict:
     """{'Selic': {2026: 9.0, 2027: 8.5}, ...}. Tolerante a falhas por indicador."""
@@ -52,6 +74,15 @@ def formatar_para_prompt(projecoes: dict) -> str:
     if not projecoes:
         return ""
     linhas = ["PROJEÇÕES DE MERCADO — Boletim Focus/BCB (mediana, fim de período):"]
+
+    atuais = obter_valores_atuais()
+
+    if atuais :
+        linhas.append("\nVALORES ATUAIS (BCB/SGS):")
+        for rotulo, valor in atuais.items() :
+            sufixo = "%" if rotulo != "Câmbio (R$/US$)" else ""
+            linhas.append(f"  • {rotulo}: {valor}{sufixo}")
+
     for indicador in _INDICADORES:
         anos = projecoes.get(indicador)
         if not anos:
