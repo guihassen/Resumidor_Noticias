@@ -60,3 +60,24 @@ Para cada notícia/ponto, use exatamente este formato:
 - NUNCA escreva "Não há notícias relevantes". Se uma área estiver calma, comente brevemente o cenário do dia.
 - Inclua análise de impacto para cada ponto. Seja analítico como um profissional real.
 """
+
+
+def build_prompt_resumo_dia(noticias: str) -> str:
+    return f"""
+Você é um Editor de Notícias experiente. Gere um "Resumo do Dia" para quem não teve tempo de acompanhar as notícias hoje.
+
+Notícias coletadas ao longo do dia: {noticias}
+
+ANTES DE TUDO: escreva o título "🌙 <b>Resumo do Dia</b>" seguido da data de hoje, e uma frase curta de abertura.
+
+Depois, selecione as 8 a 10 notícias MAIS IMPORTANTES do dia (priorize impacto em mercado, economia e grandes eventos; ignore notícias redundantes ou de menor relevância) e liste cada uma no formato:
+•   <b>Título do Ponto</b>: Resumo direto do fato e por que ele importa.
+
+### REGRAS:
+- Não separe em seções com "---SECAO---"; é uma lista única.
+- Use tags HTML <b> e <i> para formatação. NUNCA use markdown (**, __, ##, *, -, etc.).
+- Use • (bullet U+2022) para listas, nunca asterisco ou traço como bullet.
+- Nunca use <br> ou <p>.
+- Seja direto e objetivo: cada ponto deve caber em 2-3 frases.
+- LIMITE ESTRITO: 4000 caracteres no total.
+"""

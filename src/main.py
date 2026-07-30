@@ -50,6 +50,21 @@ def run():
     print("✅ Tudo pronto!")
 
 
+def run_resumo_dia():
+    print("🌙 Gerando Resumo do Dia...")
+
+    entradas = feeds.coletar_entradas(por_fonte=15)
+    raw_news = feeds.formatar_entradas(entradas)
+
+    print("🤖 Inteligência Artificial processando...")
+    resumo = llm.gerar_resumo_dia(raw_news)
+
+    print("📲 Enviando Resumo do Dia para o Telegram...")
+    telegram.enviar_telegram(resumo)
+
+    print("✅ Resumo do Dia enviado!")
+
+
 if __name__ == "__main__":
     try:
         run()

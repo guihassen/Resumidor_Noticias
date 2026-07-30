@@ -5,6 +5,7 @@ on:
     - cron: "0 13 * * *" # 10:00 BRT
     - cron: "0 16 * * *" # 16:00 BRT
     - cron: "0 21 * * *" # 20:00 BRT
+    - cron: "0 0 * * *"  # 21:00 BRT — Resumo do Dia
   workflow_dispatch:
 jobs:
   build:
@@ -27,4 +28,5 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }} # Postgres privado (dedupe de notícias)
+          RESUMO_DIA: ${{ github.event.schedule == '0 0 * * *' }}
         run: python main.py
