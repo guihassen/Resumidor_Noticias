@@ -1,5 +1,6 @@
 """Orquestrador do Morning Call."""
 from src.analysis import llm
+from src.db import repo
 from src.delivery import telegram
 from src.market import bcb, quotes
 from src.news import feeds, relevance, scraper
@@ -20,6 +21,7 @@ def run():
     print("🚀 Iniciando Morning Call...")
 
     entradas = feeds.coletar_entradas()
+    entradas = repo.filtrar_noticias_novas(entradas)  # dedupe (no-op sem DATABASE_URL)
     raw_news = feeds.formatar_entradas(entradas)
 
     print("🔮 Buscando projeções do Focus/Bacen...")

@@ -26,4 +26,5 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }} # Postgres privado (dedupe de notícias)
         run: python main.py

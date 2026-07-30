@@ -8,17 +8,19 @@ Este projeto agrega as principais notícias do dia, filtra as que citam os ativo
 2.  **Leitura da Carteira**: Extrai o texto do extrato (`wallet.pdf` local ou variável `CARTEIRA` em produção) e usa o Gemini para identificar os **ativos** (ticker, tipo, descrição).
 3.  **Projeções Macro**: Consulta a API gratuita do Banco Central (Focus/SGS) para Selic, IPCA, Câmbio e PIB — valor atual e projeção.
 4.  **Notícias Conectadas**: Filtra as notícias que citam seus ativos e extrai o **texto completo** das matérias (scraping com `trafilatura`) para análises mais profundas.
-5.  **Processamento com IA**: O Gemini gera o Morning Call cruzando notícias gerais, notícias da carteira e projeções macro.
-6.  **Entrega**: Texto formatado em blocos enviado via Bot do Telegram.
-7.  **Automação**: Roda automaticamente 3 vezes ao dia via GitHub Actions.
+5.  **Dedupe**: Antes de gerar a análise, descarta notícias já enviadas em execuções recentes (via **Postgres privado**, opcional) para não repetir a mesma manchete.
+6.  **Processamento com IA**: O Gemini gera o Morning Call cruzando notícias gerais, notícias da carteira e projeções macro.
+7.  **Entrega**: Texto formatado em blocos enviado via Bot do Telegram.
+8.  **Automação**: Roda automaticamente 3 vezes ao dia via GitHub Actions.
 
 ## ✨ Funcionalidades Principais
 
 * **Análise Multi-Setorial**: Cenário Global, Nacional, Projeções (Focus), Empresas, Agro e Tecnologia.
 * **Notícias Conectadas à Carteira**: Seção dedicada que cruza notícias (com texto completo) aos seus ativos.
 * **Projeções Econômicas**: Selic, IPCA, Câmbio e PIB do Boletim Focus/Bacen, com valor atual e câmbio atual.
+* **Dedupe de Notícias**: Evita reenviar a mesma notícia em execuções seguidas do dia (opcional, via Postgres).
 * **Fallback de Modelos**: Alterna entre versões do Gemini (e Groq) caso ocorra erro de cota.
-* **Arquitetura Modular**: Código organizado em `src/` (wallet, market, news, analysis, delivery).
+* **Arquitetura Modular**: Código organizado em `src/` (wallet, market, news, analysis, db, delivery).
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -28,6 +30,7 @@ Este projeto agrega as principais notícias do dia, filtra as que citam os ativo
 * **yfinance**: Cotação atual do câmbio.
 * **Feedparser + Trafilatura**: RSS e extração do texto completo das matérias.
 * **PyPDF2**: Extração de texto do extrato em PDF.
+* **SQLAlchemy + PostgreSQL**: Dedupe de notícias entre execuções (opcional).
 * **Telegram Bot API**: Entrega de texto via chat.
 * **GitHub Actions**: Automação e agendamento via Cron.
 
@@ -49,10 +52,13 @@ Este projeto agrega as principais notícias do dia, filtra as que citam os ativo
     GEMINI_KEY=sua_chave_aqui
     TELEGRAM_TOKEN=token_do_seu_bot
     CHAT_ID=seu_id_do_telegram
-    # Opcional:
+    # Opcionais:
     GROQ_KEY=chave_groq_para_fallback
+    DATABASE_URL=postgresql://usuario:senha@host:5432/banco   # Postgres privado (dedupe de notícias)
     ```
 4.  Coloque o seu extrato da carteira renomeado para `wallet.pdf` na raiz da pasta.
+
+> **Sobre o `DATABASE_URL`**: é **opcional**. Sem ele, o pipeline roda normalmente, apenas sem o dedupe (pode repetir notícias entre execuções). Use uma base **privada** (ex.: [Supabase](https://supabase.com) ou [Neon](https://neon.tech), free tier) — assim nenhum dado sensível fica no repositório.
 
 ## 🤖 Automação (GitHub Actions)
 
@@ -62,7 +68,7 @@ Para que o projeto rode na nuvem de forma segura e agendada:
 2.  **Configurar Secrets**: No seu repositório GitHub, vá em *Settings > Secrets and variables > Actions* e adicione as chaves:
     * `GEMINI_KEY`, `TELEGRAM_TOKEN`, `CHAT_ID`.
     * `CARTEIRA`: Cole aqui o texto que você copiou no passo 1.
-    * *(Opcional)* `GROQ_KEY`.
+    * *(Opcionais)* `GROQ_KEY`, `DATABASE_URL` (Postgres privado para dedupe de notícias).
 3.  **Ativação Obrigatória**:
     > ⚠️ **IMPORTANTE**: O agendamento automático do GitHub Actions (Cron) só entrará em vigor após você executar o workflow manualmente pela primeira vez.
     * Vá na aba **Actions** do repositório.

@@ -6,3 +6,5 @@ PyPDF2
 python-dotenv
 yfinance
 trafilatura
+SQLAlchemy
+psycopg2-binary
