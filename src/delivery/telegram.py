@@ -56,16 +56,3 @@ def enviar_telegram(mensagem: str):
                 print(f"❌ Erro ao enviar parte: {response.text}")
                 print(f"Trecho com erro: {bloco[:50]}...")
             time.sleep(1)
-
-
-def enviar_foto(imagem, legenda: str = ""):
-    """Envia uma imagem (BytesIO/bytes) ao Telegram via sendPhoto."""
-    if imagem is None:
-        return
-    url = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}/sendPhoto"
-    files = {"photo": ("grafico.png", imagem, "image/png")}
-    data = {"chat_id": config.CHAT_ID, "caption": legenda[:1024]}
-    response = requests.post(url, data=data, files=files)
-    if response.status_code != 200:
-        print(f"❌ Erro ao enviar foto: {response.text}")
-    time.sleep(1)

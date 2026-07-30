@@ -26,6 +26,4 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           CARTEIRA: ${{ secrets.CARTEIRA }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }} # Postgres privado (histórico/gráfico de evolução)
-          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }} # opcional: cotações via brapi.dev
         run: python main.py

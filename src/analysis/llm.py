@@ -10,12 +10,10 @@ GROQ_MODELS = ["llama-3.3-70b-versatile", "gemma2-9b-it", "llama-3.1-8b-instant"
 
 def gerar_resumo(
     noticias: str,
-    texto_carteira: str,
     noticias_relevantes: str = "",
     projecoes: str = "",
-    expectativa_dia: str = "",
 ) -> str:
-    prompt = build_prompt(noticias, texto_carteira, noticias_relevantes, projecoes, expectativa_dia)
+    prompt = build_prompt(noticias, noticias_relevantes, projecoes)
     client = get_gemini()
 
     for model in GEMINI_MODELS:
@@ -29,10 +27,9 @@ def gerar_resumo(
     groq_client = get_groq()
     if groq_client:
         # Groq free tier tem limite de tokens por minuto (~6k TPM):
-        # usa versão compacta das notícias e da carteira.
+        # usa versão compacta das notícias.
         noticias_curtas = buscar_noticias(resumo_curto=True)
-        carteira_curta = texto_carteira[:2000]
-        prompt_groq = build_prompt(noticias_curtas, carteira_curta)
+        prompt_groq = build_prompt(noticias_curtas)
 
         for model in GROQ_MODELS:
             try:
