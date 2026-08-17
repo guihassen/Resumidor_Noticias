@@ -1,8 +1,10 @@
 # 📈 Resumidor de Noticias & Morning Call Automático
 
-Este projeto agrega as principais notícias do dia, filtra as que citam os ativos da sua carteira, incorpora **projeções econômicas do Boletim Focus/Bacen** e usa a IA **Google Gemini** para gerar um "Morning Call" personalizado enviado diretamente para o seu Telegram.
+Este projeto agrega as principais notícias do dia, filtra as que citam os ativos da sua carteira, incorpora **projeções econômicas do Boletim Focus/Bacen** e usa a IA **Google Gemini** para gerar um "Morning Call" personalizado enviado diretamente para o seu Telegram. À noite, um segundo envio — o **Resumo do Dia** — recapitula só as notícias gerais mais importantes, para quem não teve tempo de acompanhar durante o dia.
 
 ## 🚀 Como Funciona?
+
+**Morning Call (10h, 16h e 20h BRT):**
 
 1.  **Coleta de Notícias**: Busca notícias em tempo real via RSS (InfoMoney, Money Times, Valor, Exame, etc.).
 2.  **Leitura da Carteira**: Extrai o texto do extrato (`wallet.pdf` local ou variável `CARTEIRA` em produção) e usa o Gemini para identificar os **ativos** (ticker, tipo, descrição).
@@ -11,15 +13,21 @@ Este projeto agrega as principais notícias do dia, filtra as que citam os ativo
 5.  **Dedupe**: Antes de gerar a análise, descarta notícias já enviadas em execuções recentes (via **Postgres privado**, opcional) para não repetir a mesma manchete.
 6.  **Processamento com IA**: O Gemini gera o Morning Call cruzando notícias gerais, notícias da carteira e projeções macro.
 7.  **Entrega**: Texto formatado em blocos enviado via Bot do Telegram.
-8.  **Automação**: Roda automaticamente 3 vezes ao dia via GitHub Actions.
+
+**Resumo do Dia (21h BRT):**
+
+Uma execução separada e mais simples: coleta as notícias gerais do dia (sem dedupe, sem carteira, sem projeções) e pede à IA uma lista única com as 8-10 notícias mais importantes, para um recap noturno.
+
+**Automação**: Roda automaticamente 4 vezes ao dia via GitHub Actions (3 Morning Call + 1 Resumo do Dia).
 
 ## ✨ Funcionalidades Principais
 
-* **Análise Multi-Setorial**: Cenário Global, Nacional, Projeções (Focus), Empresas, Agro e Tecnologia.
+* **Morning Call Multi-Setorial**: Cenário Global, Nacional, Projeções (Focus), Empresas, Agro e Tecnologia.
+* **Resumo do Dia**: Envio noturno (21h BRT) com um recap enxuto das notícias gerais mais importantes do dia.
 * **Notícias Conectadas à Carteira**: Seção dedicada que cruza notícias (com texto completo) aos seus ativos.
 * **Projeções Econômicas**: Selic, IPCA, Câmbio e PIB do Boletim Focus/Bacen, com valor atual e câmbio atual.
-* **Dedupe de Notícias**: Evita reenviar a mesma notícia em execuções seguidas do dia (opcional, via Postgres).
-* **Fallback de Modelos**: Alterna entre versões do Gemini (e Groq) caso ocorra erro de cota.
+* **Dedupe de Notícias**: Evita reenviar a mesma notícia em execuções seguidas do dia (opcional, via Postgres). Aplicado só ao Morning Call — o Resumo do Dia recapitula de propósito notícias já enviadas antes.
+* **Fallback de Modelos**: Alterna entre versões do Gemini (`gemini-2.5-flash` → `gemini-2.5-flash-lite` → `gemini-2.0-flash` → `gemini-2.5-pro`) e, se todas falharem, entre modelos Groq.
 * **Arquitetura Modular**: Código organizado em `src/` (wallet, market, news, analysis, db, delivery).
 
 ## 🛠️ Tecnologias Utilizadas
@@ -74,6 +82,8 @@ Para que o projeto rode na nuvem de forma segura e agendada:
     * Vá na aba **Actions** do repositório.
     * Selecione o workflow **Resumidor Diario de Noticias**.
     * Clique no botão **Run workflow**. Isso valida suas credenciais e "acorda" o sistema de agendamento.
+
+O workflow roda 4 vezes ao dia (horários em UTC no `cron.yml`, Brasília = UTC-3): **10h, 16h e 20h BRT** disparam o Morning Call completo; **21h BRT** dispara o Resumo do Dia (identificado via `github.event.schedule` na env `RESUMO_DIA`). Execuções manuais (`Run workflow`) sempre caem no Morning Call.
 
 ## 🛡️ Segurança
 
